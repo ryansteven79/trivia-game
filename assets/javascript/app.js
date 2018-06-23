@@ -115,7 +115,9 @@ $(document).ready(function () {
     var i = 0;
     var wins = 0;
     var losses = 0;
+    var unanswered = 0;
     var time = 10;
+    var timer;
 
     $("#start").on("click", function () {
         startGame();
@@ -137,10 +139,10 @@ $(document).ready(function () {
 
     function displayQuestion(i) {
         $("#question-pad").html("<b>Question: </b>" + trivia[i].question);
-        $("#answers").append("<button id='q1' type=/button' value='' class='btn btn-primary m-3'></button>");
-        $("#answers").append("<button id='q2' type=/button' value='' class='btn btn-primary m-3'></button>");
-        $("#answers").append("<button id='q3' type=/button' value='' class='btn btn-primary m-3'></button>");
-        $("#answers").append("<button id='q4' type=/button' value='' class='btn btn-primary m-3'></button>");
+        $("#answers").append("<button id='q1' type=/button' value='' class='btn btn-ans btn-primary m-3'></button>");
+        $("#answers").append("<button id='q2' type=/button' value='' class='btn btn-ans btn-primary m-3'></button>");
+        $("#answers").append("<button id='q3' type=/button' value='' class='btn btn-ans btn-primary m-3'></button>");
+        $("#answers").append("<button id='q4' type=/button' value='' class='btn btn-ans btn-primary m-3'></button>");
     }
 
     function addValues(i) {
@@ -158,7 +160,7 @@ $(document).ready(function () {
     }
 
     function sendValues(i) {
-        $("button").click(function () {
+        $(".btn-ans").click(function () {
             userSelected = $(this).val();
             trivia[i].userGuess = userSelected;
             checker(i);
@@ -177,7 +179,7 @@ $(document).ready(function () {
         } else {
             $("#answers").empty();
             $("#answers").html("<h4 class='text-danger'>Sorry. Correct answer is " + correctAnswer + "</h4>");
-            $("#result").html("<img src='assets/images/Wrong.jpg' class='img-fluid' alt='Responsive image'>");
+            $("#result").html(trivia[i].correctImage);
             losses++;
             setTimeout(nextQuestion, 3000)
         }
@@ -194,34 +196,61 @@ $(document).ready(function () {
         $("#result").empty();
         i++;
         time = 10;
-        $("#display").html("00:" + time)
+        $("#display").html("Time Remaining: 00:" + time)
         stopTimer();
         startGame();
     }
 
     function endGame() {
-        location.reload();
+        setTimeout(gameOver, 3000);
     }
 
-    var timer;
+    function gameOver() {
+        $("#question-pad").empty();
+        $("#answers").empty();
+        $("#result").empty();
+        $("#answers").append("<h4 class='text-success'>You got " + wins + " answers correct</h4>");
+        $("#answers").append("<h4 class='text-danger'>You got " + losses + " answers wrong</h4>");
+        $("#answers").append("<h4 class='text-info'>You had " + unanswered + " unanswered questions</h4>");
+        $("#answers").append("<h4 class='text-primary'>Please play again.</h4>");
+        i = 0;
+        wins = 0;
+        losses = 0;
+        time = 10;
+        setTimeout(function () {
+            $("#answers").empty();
+            updateScore();
+            $("#start").show();
+            $("#display").html("Time Remaining: 00:" + time)
+        }, 3000)
+    }
 
     function startTimer() {
         timer = setInterval(checkTimesUp, 1000);
-
     }
 
     function stopTimer() {
         clearInterval(timer);
     }
 
+    function sorry() {
+        $("#question-pad").empty();
+        $("#answers").empty();
+        $("#result").empty();
+        $("#answers").html("<h4 class='text-success'>Sorry. You took too long! That's a loss.</h4>");
+
+    }
+
     function checkTimesUp() {
         if (time <= 0) {
+            // setTimeout(sorry, 3000);
             nextQuestion();
             losses++;
+            unanswered++;
             updateScore();
         } else {
             time--;
-            $("#display").html("00:0" + time)
+            $("#display").html("Time Remaining: 00:0" + time)
         }
     }
 
